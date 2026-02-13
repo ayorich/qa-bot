@@ -1,0 +1,29 @@
+# QABot PDF RAG – run backend + frontend
+# Usage: docker compose up --build
+
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      # Point server container at Ollama running on the host
+      - OLLAMA_HOST=http://host.docker.internal:11434
+    # Optional: mount a volume for uploads (temp files are deleted after process)
+    restart: unless-stopped
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "3005:3000"
+    environment:
+      # Backend URL (server-side); use Docker service name
+      - API_URL=http://server:8000
+    depends_on:
+      - server
+    restart: unless-stopped
