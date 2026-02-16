@@ -1,0 +1,43 @@
+# QABot PDF RAG – Development mode with hot-reload
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+# Or: docker compose -f docker-compose.dev.yml up --build
+
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      # Point server container at Ollama running on the host
+      - OLLAMA_HOST=http://host.docker.internal:11434
+    # Mount source code for live updates
+    volumes:
+      - ./server:/app
+      # Exclude node_modules and other build artifacts
+      - /app/__pycache__
+      - /app/.pytest_cache
+    restart: unless-stopped
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3005:3000"
+    environment:
+      # Backend URL (server-side); use Docker service name
+      - API_URL=http://server:8000
+      # Enable Next.js fast refresh
+      - WATCHPACK_POLLING=true
+    # Mount source code for live updates
+    volumes:
+      - ./client:/app
+      # Exclude node_modules to use container's installed packages
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - server
+    restart: unless-stopped

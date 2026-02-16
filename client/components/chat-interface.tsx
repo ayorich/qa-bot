@@ -1,6 +1,6 @@
 "use client";
 
-import { Bot, FileUp, Lightbulb, Send, User } from "lucide-react";
+import { Bot, FileUp, Lightbulb, Loader2, Send, User } from "lucide-react";
 import { useState, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
@@ -212,10 +212,12 @@ export function ChatInterface() {
               <button
                 type="button"
                 onClick={handleSend}
-                disabled={!message.trim()}
+                disabled={!message.trim()||uploading}
                 className="neomorphic-button px-5 py-4 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Send className="w-5 h-5" />
+                {uploading ? <Loader2 className="w-5 h-5" /> : <Send className="w-5 h-5" />}
+               
+                 
               </button>
             </div>
           </div>
