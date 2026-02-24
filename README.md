@@ -52,6 +52,8 @@ sequenceDiagram
   end
 ```
 
+For a prioritized list of improvements and advanced RAG features, see **[RAG Improvements & Feature Ideas](./RAG_IMPROVEMENTS.md)**.
+
 ## Quick Start Guide
 
 ### Step 1: Prerequisites
