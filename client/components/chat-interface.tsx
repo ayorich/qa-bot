@@ -54,7 +54,7 @@ export function ChatInterface() {
         setUploadError(data.error || "Upload failed.");
       }
     } catch (err) {
-      setUploadError("Upload failed. Is the server running on port 8000?");
+      setUploadError("Upload failed. Is the server running on?");
     } finally {
       setUploading(false);
       e.target.value = "";
@@ -62,7 +62,6 @@ export function ChatInterface() {
   };
 
   const handleAsk = async () => {
-    console.log("handleAsk");
 
     const res = await fetch("/api/chat", {
       method: "POST",
@@ -71,7 +70,6 @@ export function ChatInterface() {
         data: { question: message, history: messages.map((m) => m.content) },
       }),
     });
-    console.log(res);
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       const msg = err?.detail?.[0]?.msg || err?.detail || err?.error || "Request failed.";
@@ -148,14 +146,14 @@ export function ChatInterface() {
               Suggested questions
             </h4>
             <div className="space-y-2">
-              {suggestedQuestions.map((q, i) => (
+              {suggestedQuestions.map((suggestedQuestion, i) => (
                 <button
                   key={i}
                   type="button"
-                  onClick={() => setMessage(q)}
+                  onClick={() => setMessage(suggestedQuestion)}
                   className="w-full text-left p-3 text-sm neomorphic-button rounded-2xl"
                 >
-                  {q}
+                  {suggestedQuestion}
                 </button>
               ))}
             </div>
@@ -215,7 +213,7 @@ export function ChatInterface() {
                 disabled={!message.trim()||uploading}
                 className="neomorphic-button px-5 py-4 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {uploading ? <Loader2 className="w-5 h-5" /> : <Send className="w-5 h-5" />}
+                {uploading ? <Loader2  className="w-5 h-5" /> : <Send className="w-5 h-5" />}
                
                  
               </button>
