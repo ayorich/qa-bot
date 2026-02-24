@@ -309,6 +309,3 @@ Without Ollama, the app falls back to a small Hugging Face model (CPU).
 
 ---
 
-## Plan
-
-See `PLAN.md` for analysis and tree-of-thought decisions.
