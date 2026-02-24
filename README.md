@@ -1,6 +1,6 @@
 # PDF Upload AI App (QABot)
 
-PDF upload + RAG Q&A app. Structure follows **ydkjs-with-rag**; PDF logic is from the original qabot (local embeddings + Ollama/HF fallback).
+PDF upload + RAG Q&A app (local embeddings + Ollama/HF fallback).
 
 ## Structure
 
@@ -8,6 +8,49 @@ PDF upload + RAG Q&A app. Structure follows **ydkjs-with-rag**; PDF logic is fro
 - **client/** — Next.js frontend: single page with upload + chat (neomorphic UI)
 
 ---
+
+## Architecture (RAG data flow)
+
+The system has two main flows: **PDF upload/indexing** and **question answering (retrieve + generate)**.
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor U as User (Browser)
+  participant UI as Next.js UI (client)
+  participant API as Next.js Route Handler<br/>`client/app/api/chat/route.ts`
+  participant S as FastAPI<br/>`server/entry.py`
+  participant R as RAG Pipeline<br/>`server/module/document/rag.py`
+  participant L as PDF Loader + Splitter<br/>`server/module/document/loader.py`
+  participant E as Embeddings<br/>`server/configs/llm.py`
+  participant V as Chroma Vector DB (in-memory)
+  participant M as LLM<br/>Ollama (preferred) / HF fallback
+
+  rect rgb(245, 245, 245)
+  note over U,UI: Flow A — Upload + Index
+  U->>UI: Select PDF + Upload
+  UI->>S: POST `/upload` (multipart/form-data)
+  S->>R: `process_document(path)`
+  R->>L: Load PDF → split into chunks
+  R->>E: Embed chunks
+  R->>V: Store vectors + build retriever
+  R->>R: Build in-memory RAG chain (replaced on each upload)
+  S-->>UI: `{ ok: true, message: "PDF processed..." }`
+  end
+
+  rect rgb(245, 245, 245)
+  note over U,API: Flow B — Ask (Retrieve + Generate, streaming)
+  U->>UI: Ask a question
+  UI->>API: POST `/api/chat` (question + optional history)
+  API->>S: POST `/ask` (JSON `{ data: { question, history } }`)
+  S->>R: `ask_stream(question)`
+  R->>V: Retrieve top relevant chunks
+  R->>M: Prompt (context + question) → generate tokens
+  S-->>API: Streamed `text/plain` response
+  API-->>UI: Stream to UI (chunked)
+  UI-->>U: Render answer as it streams
+  end
+```
 
 ## Quick Start Guide
 
